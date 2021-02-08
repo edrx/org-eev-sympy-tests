@@ -1,0 +1,125 @@
+# (find-angg "ORG/prototipo.org")
+# (defun c () (interactive) (eek "C-c C-e h h"))
+# (defun c () (interactive) (eek "C-c C-e l p"))
+# (defun v () (interactive) (brg "~/ORG/prototipo.html"))
+# (defun e () (interactive) (find-angg "ORG/prototipo.org"))
+
+#+TITLE: Protótipo
+
+#+NAME: scrWrapEquation
+#+BEGIN_SRC sh :results output :exports none :var outp="expample output"
+  cat <<EOF
+  \begin{equation}
+  $outp
+  \end{equation}
+  EOF
+#+END_SRC
+
+#+RESULTS: scrWrapEquation
+: \begin{equation}
+: expample output
+: \end{equation}
+
+#+begin_src elisp :exports none
+    ; (find-file "/home/odecam/org-babel-examples/python/pythonbabel.org" "Sympy")
+    ; (find-pdf-page "~/org-roam/20210202003546-prototipo_projeto_monitoria.pdf")
+    ; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
+    ; https://nixos.wiki/wiki/TexLive
+    ; https://github.com/dfeich/org-babel-examples
+#+end_src
+
+#+RESULTS:
+
+* Resolvendo uma edo utilizando sympy
+
+** Requisitos para representar uma EDO simbolicamente no python usando sympy
+
+   Para representar uma EDO usando sympy em primeiro lugar temos que importar a bilioteca sympy
+
+   #+begin_src python :session :exports code
+     import sympy as sym
+   #+end_src
+
+   #+RESULTS:
+
+   Agora utilizando a biblioteca devemos criar uma função indefinida, que será usada para descrever a EDO de forma simbólica
+
+   #+begin_src python :session :exports code
+     f = sym.Function('f')
+   #+end_src
+
+   #+RESULTS:
+
+   E a função deve ter uma variavel
+
+   #+begin_src python :session :exports code
+     x = sym.symbols('x')
+   #+end_src
+
+   #+RESULTS:
+
+   Agora podemos representar uma função indefinida na variável x usando
+
+   #+begin_src python :session :exports code
+     f(x)
+   #+end_src
+
+   #+RESULTS:
+   : f(x)
+   
+   #+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+     print(sym.latex(f(x)))
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   \begin{equation}
+   f{\left(x \right)}
+   \end{equation}
+   :end:
+
+** EDO
+
+   Agora que já sabemos como representar uma função indefinida no sympy precisamos saber representar suas derivadas.
+   Para isso devemos usar o método diff() presente nas expressões do sympy.
+   Ele recebe uma variável como parâmetro e retorna a derivada da função naquela variável se avalia-la.
+   Pode-se passar mais de uma variável como parâmetro, nesse caso será aplicada uma derivada em sequencia da outra.
+   Então diff(x, x) representa a derivada de segunda ordem.
+   
+   #+begin_src python :session :exports code
+     edo = f(x).diff(x) - x**3 / sym.exp(2*f(x))
+   #+end_src
+
+   #+RESULTS:
+
+   #+begin_src python :session :results output drawer :exports results :post scrWrapEquation(outp=*this*)
+     print(sym.latex(sym.Eq(edo,0)))
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   \begin{equation}
+   - x^{3} e^{- 2 f{\left(x \right)}} + \frac{d}{d x} f{\left(x \right)} = 0
+   \end{equation}
+   :end:
+
+   Para encontrar as soluções dessa edo, usaremos a função dsolve() que recebe como parâmetro uma equação e uma funçao matemática
+   Passaremos nossa variável edo como a equação, e f(x) como a função matemática.
+   Mesmo edo não sendo uma equação, e sim uma expressão, nós podemos passa-la como parâmetro porque as expressões em sympy são consideradads automaticamente como igualadas a zero por qualquer solver.
+
+   #+begin_src python :session :exports code
+     sol = sym.dsolve(edo, f(x))
+   #+end_src
+
+   #+RESULTS:
+
+   #+begin_src python :session :results output drawer :exports results :post scrWrapEquation(outp=*this*)
+     print(sym.latex(sol))
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   \begin{equation}
+
+   \end{equation}
+   :end:

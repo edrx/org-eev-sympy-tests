@@ -1,0 +1,29 @@
+# (find-oest "README.org")
+# (code-c-d "oest" "~/usrc/org-eev-sympy-tests/" :anchor)
+# (defun c () (interactive) (eek "C-c C-e h h"))
+# (defun v () (interactive) (brg "~/usrc/org-eev-sympy-tests/README.html"))
+# (defun e () (interactive) (find-oest "README.org"))
+# (defun cv () (interactive) (c) (v))
+
+# (find-orgnode "Table of Contents")
+#+OPTIONS: toc:nil num:nil
+
+#+TITLE: Making org, eev, and sympy work together
+
+* Introduction
+
+By Bruno Macedo and Eduardo Ochs
+
+Big mess - [[https://thenewstack.io/not-expected-understand-explainer/][You are Not Expected to Understand This]]
+
+#+begin_comment
+ (eepitch-shell)
+ (eepitch-kill)
+ (eepitch-shell)
+
+rm -Rv ~/usrc/org-eev-sympy-tests/
+mkdir  ~/usrc/org-eev-sympy-tests/
+cd     ~/usrc/org-eev-sympy-tests/
+
+#+end_comment
+
