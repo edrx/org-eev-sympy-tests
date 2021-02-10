@@ -1,5 +1,6 @@
 # This file:
 # https://github.com/edrx/org-eev-sympy-tests
+# https://github.com/edrx/org-eev-sympy-tests/blob/main/oest.e
 #     (find-fline "~/usrc/org-eev-sympy-tests/oest.e")
 #                                 (find-oest "oest.e")
 #
@@ -90,3 +91,14 @@ git log --oneline --graph --all -20
 # (find-gitk  "/tmp/org-eev-sympy-tests/")
 
 git pull
+
+
+
+
+# (find-efunction 'org-babel-execute-src-block)
+# (find-orgnode "Evaluating Code Blocks" "org-babel-execute-src-block")
+
+
+
+
+# https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
