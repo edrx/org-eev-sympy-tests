@@ -1,0 +1,361 @@
+#+TITLE: Utilizando a regra da substituição no sympy
+
+# (defun c () (interactive) (eek "C-c C-e l p"))
+
+#+NAME: scrWrapEquation
+#+BEGIN_SRC sh :results output :exports none :var outp="expample output"
+  cat <<EOF
+  \begin{equation}
+  $outp
+  \end{equation}
+  EOF
+#+END_SRC
+
+* Criando a integral
+#+begin_src python :session :exports code
+  from sympy import *
+
+  x, u, dx, du = symbols('x u dx du')
+  inte = Integral( 1 / (2*x + 5), x)
+  inte
+#+end_src
+
+#+RESULTS:
+: Integral(1/(2*x + 5), x)
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(inte))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int \frac{1}{2 x + 5}\, dx
+\end{equation}
+:end:
+
+* Acessando a expressão dentro da integral
+
+#+begin_src python :session :exports code
+  inte.args
+#+end_src
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(inte.args))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\left( \frac{1}{2 x + 5}, \  \left( x\right)\right)
+\end{equation}
+:end:
+
+#+begin_src python :session :exports code
+  inte.args[0]
+#+end_src
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(inte.args[0]))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\frac{1}{2 x + 5}
+\end{equation}
+:end:
+
+* Fazendo uma substituição
+
+#+begin_src python :session :exports code
+  subst = Eq(u, 2*x + 5)
+  subst
+#+end_src
+
+#+RESULTS:
+: Eq(u, 2*x + 5)
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+print(latex(subst))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+u = 2 x + 5
+\end{equation}
+:end:
+
+#+begin_src python :session :exports code
+subst.lhs
+#+end_src
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+print(subst.lhs)
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+u
+\end{equation}
+:end:
+
+#+begin_src python :session :exports code
+subst.rhs
+#+end_src
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+print(subst.rhs)
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+2*x + 5
+\end{equation}
+:end:
+
+#+begin_src python :session :exports code
+  dif_rel = Eq( subst.lhs.diff(u) * du, subst.rhs.diff(x) * dx)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+print(latex(dif_rel))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+du = 2 dx
+\end{equation}
+:end:
+
+#+begin_src python :session :exports code
+  dif_rel = Eq(dx, solve(dif_rel, dx)[0])
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+print(latex(dif_rel))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+dx = \frac{du}{2}
+\end{equation}
+:end:
+
+#+begin_src python :session :exports code
+  inte_subst = Integral( inte.args[0].subs(subst.rhs, subst.lhs) * dif_rel.rhs/du, u)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+print(latex(inte_subst))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int \frac{1}{2 u}\, du
+\end{equation}
+:end:
+
+* Tentando transformar este processo em uma função
+
+#+begin_src python :session outra :exports code
+  from sympy import *
+  x, u = symbols('x u')
+
+  def substitui (integral, substituicao):
+      nova = Integral( integral.args[0].subs(substituicao.rhs, substituicao.lhs) / substituicao.rhs.diff(), substituicao.lhs )
+      return nova
+#+end_src
+
+#+RESULTS:
+
+** Teste 1
+#+begin_src python :session outra :exports code
+  inte1 = Integral(18*x**2 * pow(6*x**3 + 5, 1/4), x)
+  inte1
+#+end_src
+
+#+RESULTS:
+: Integral(18*x**2*(6*x**3 + 5)**0.25, x)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(inte1))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int 18 x^{2} \left(6 x^{3} + 5\right)^{0.25}\, dx
+\end{equation}
+:end:
+
+#+begin_src python :session outra :exports code
+  subst1 = Eq(u, 6*x**3 + 5)
+  subst1
+#+end_src
+
+#+RESULTS:
+: Eq(u, 6*x**3 + 5)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(subst1))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+u = 6 x^{3} + 5
+\end{equation}
+:end:
+
+
+#+begin_src python :session outra :exports code
+  res1 = substitui( inte1, subst1)
+  res1
+#+end_src
+
+#+RESULTS:
+: Integral(u**0.25, u)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(res1))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int u^{0.25}\, du
+\end{equation}
+:end:
+
+** teste2
+#+begin_src python :session outra :exports code
+  inte2 = Integral((1 - 1/x) * cos( x - ln(x)), x)
+  inte2
+#+end_src
+
+#+RESULTS:
+: Integral((1 - 1/x)*cos(x - log(x)), x)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(inte2))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int \left(1 - \frac{1}{x}\right) \cos{\left(x - \log{\left(x \right)} \right)}\, dx
+\end{equation}
+:end:
+
+#+begin_src python :session outra :exports code
+  subst2 = Eq(u, x - log(x))
+  subst2
+#+end_src
+
+#+RESULTS:
+: Eq(u, x - log(x))
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(subst2))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+u = x - \log{\left(x \right)}
+\end{equation}
+:end:
+
+
+#+begin_src python :session outra :exports code
+  res2 = substitui( inte2, subst2)
+  res2
+#+end_src
+
+#+RESULTS:
+: Integral(cos(u), u)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(res2))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int \cos{\left(u \right)}\, du
+\end{equation}
+:end:
+
+** teste3
+#+begin_src python :session outra :exports code
+  inte3 = Integral(Mul(3, (8*x - 1), evaluate=False)*exp(4*x**2 - x), x)
+  inte3
+#+end_src
+
+#+RESULTS:
+: Integral(3*(8*x - 1)*exp(4*x**2 - x), x)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(inte3))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int 3 \left(8 x - 1\right) e^{4 x^{2} - x}\, dx
+\end{equation}
+:end:
+
+#+begin_src python :session outra :exports code
+  subst3 = Eq(u, 4*x**2 - x)
+  subst3
+#+end_src
+
+#+RESULTS:
+: Eq(u, 4*x**2 - x)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(subst3))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+u = 4 x^{2} - x
+\end{equation}
+:end:
+
+
+#+begin_src python :session outra :exports code
+  res3 = substitui( inte3, subst3)
+  res3
+#+end_src
+
+#+RESULTS:
+: Integral(3*exp(u), u)
+
+#+begin_src python :session outra :exports results :results output drawer :post scrWrapEquation(outp=*this*)
+  print(latex(res3))
+#+end_src
+
+#+RESULTS:
+:results:
+\begin{equation}
+\int 3 e^{u}\, du
+\end{equation}
+:end:
+
+
